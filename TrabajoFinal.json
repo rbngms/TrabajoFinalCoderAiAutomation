@@ -1,0 +1,1355 @@
+{
+  "name": "TrabajoFinal",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Contactanos",
+        "formDescription": "Solicita información\nCompleta el formulario y un asesor comercial se pondrá en contacto contigo en menos de 24 horas.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "DNI",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Telefono",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Correo electronico",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Presupuesto Aproximado",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Menos de S/150,000"
+                  },
+                  {
+                    "option": "S/150,000 - S/250,000"
+                  },
+                  {
+                    "option": "S/250,000 - S/400,000"
+                  },
+                  {
+                    "option": "Más de S/400,000"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Comentario/Información adicional"
+            },
+            {
+              "fieldLabel": "Producto de interes",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Bonos"
+                  },
+                  {
+                    "option": "Acciones"
+                  },
+                  {
+                    "option": "Inmuebles"
+                  },
+                  {
+                    "option": "Fidecomiso"
+                  },
+                  {
+                    "option": "Otro"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5204583b-ad33-459f-841e-f5161e7d140a",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -384,
+        -48
+      ],
+      "webhookId": "bca77ea7-3871-41d9-a501-f8e654d0447f"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "id": "7bb88f2a-99d5-4ee9-8c6f-cd83e19ceff4",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Genera el briefing de ventas para el siguiente lead que acaba de llenar el formulario del fondo de inversión:\n\n- Nombre: {{ $json.Nombre }}\n- Teléfono: {{ $json.Telefono }}\n- Correo: {{ $json['Correo electronico'] }}\n- Presupuesto aproximado: {{ $json['Presupuesto Aproximado'] }}\n- Producto de interés: {{ $json['Producto de interes'] }}\n- Comentario del cliente: \"{{ $json['Comentario/Información adicional'] }}\"\n\nAnaliza especialmente el comentario del cliente para inferir su motivación, nivel de conocimiento financiero y posibles objeciones. Sigue el formato de 5 secciones definido en tus instrucciones",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Eres un asistente de ventas interno para los asesores comerciales de [Nombre del Fondo de Inversión]. Tu trabajo NO es hablar con el cliente directamente: generas un briefing de ventas para que el asesor humano lo use en su llamada o reunión.\nTAREA:\nAnaliza especialmente el campo \"Comentario del cliente\" para inferir su motivación real, nivel de conocimiento financiero, posibles objeciones y urgencia. Combínalo con el presupuesto y el producto de interés para armar un briefing accionable.\n\nFORMATO DE RESPUESTA (usa exactamente estas secciones):\n\n1. Perfil rápido del lead\nUn párrafo breve resumiendo quién es este cliente y qué está buscando, basado en sus datos y comentario.\n\n2. Gancho de apertura sugerido\n1-2 frases que el asesor puede usar para abrir la conversación conectando con lo que el cliente mencionó específicamente (no genérico).\n\n3. Puntos clave a destacar\n3-4 bullets con los beneficios del producto de interés que más probablemente le importen a ESTE cliente en particular, según su comentario y presupuesto.\n\n4. Objeciones probables y cómo manejarlas\n2-3 objeciones que este perfil de cliente suele tener, con una respuesta breve sugerida para cada una.\n\n5. Siguiente paso recomendado\nQué debería proponer el asesor al cerrar la llamada (ej: agendar reunión, enviar ficha del fondo, programar demo, etc).\n\n6.potencial_negocio\nDebe ser exactamente uno de estos tres valores (en minúscula, sin variaciones): \"bajo\", \"media\", \"alto\". Evalúa esto según el presupuesto del cliente, su nivel de interés expresado en el comentario, y qué tan claro es su objetivo de inversión.\n\nREGLAS:\n- Nunca inventes cifras de rentabilidad, garantías o promesas de retorno que no te hayan sido dadas explícitamente.\n- El tono debe ser profesional y consultivo, nunca agresivo ni de presión.\n- Todo el contenido debe cumplir con buenas prácticas de asesoría financiera: presentar riesgos junto con beneficios cuando el producto lo amerite.\n- Responde siempre en español.\n- Sé breve y accionable — el asesor lo va a leer en segundos antes de llamar, no es un ensayo."
+        }
+      },
+      "id": "85ec2b94-2521-4596-8b66-7af033391fb9",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -32,
+        -48
+      ],
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "200b1160-37fd-4cb9-b87d-fdf1abff160b",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        240
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "fe4oo5zqBqVQFUaO",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $execution.id }}"
+      },
+      "id": "e893d345-90e6-44b4-8b06-faf20ab8ec9f",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        64,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"perfil_rapido\": \"Rubén es un inversor con un presupuesto moderado, menor a S/150,000, que muestra interés específico en invertir en acciones. Su comentario breve sugiere conocimiento básico o intermedio en temas financieros, con motivación hacia la renta variable pero sin aún expresar detalles sobre su objetivo o experiencia.\",\n  \"gancho_apertura\": \"Hola Rubén, noté que estás interesado en invertir en acciones; me gustaría entender mejor qué expectativas tienes para apoyarte a elegir las opciones que mejor se ajusten a tu perfil y presupuesto.\",\n  \"puntos_clave\": [\n    \"Diversificación dentro del mercado accionario para mitigar riesgos específicos.\",\n    \"Acceso a gestión profesional que ayuda a tomar decisiones informadas dentro del fondo.\",\n    \"Potencial de crecimiento a mediano y largo plazo acorde con su interés en renta variable.\",\n    \"Flexibilidad para ajustar el nivel de riesgo según su perfil y horizonte de inversión.\"\n  ],\n  \"objeciones\": [\n    {\n      \"objecion\": \"No conozco mucho sobre cómo funcionan las acciones.\",\n      \"respuesta\": \"Explicar que el fondo ofrece asesoría continua y gestión profesional para facilitar la inversión sin necesidad de ser experto.\"\n    },\n    {\n      \"objecion\": \"Me preocupa la volatilidad y posibles pérdidas.\",\n      \"respuesta\": \"Señalar que la inversión en acciones conlleva riesgos, pero se mitigarán con diversificación y una estrategia adecuada a su perfil.\"\n    },\n    {\n      \"objecion\": \"¿Qué garantías tengo sobre mi dinero?\",\n      \"respuesta\": \"Aclarar que las inversiones en acciones no tienen garantía absoluta, pero el fondo cuenta con regulación y transparencia para proteger al inversor.\"\n    }\n  ],\n  \"siguiente_paso\": \"Proponer agendar una reunión o llamada para analizar el perfil de riesgo de Rubén y presentarle las opciones específicas de fondos de acciones que se ajusten a su presupuesto y objetivos.\",\n  \"potencial_negocio\": \"media\"\n}"
+      },
+      "id": "18f88345-a377-41cb-9d4b-31e6c6c4b928",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appHBqG4mqsMhhmQe",
+          "mode": "list",
+          "cachedResultName": "TrabajoFinalCoder",
+          "cachedResultUrl": "https://airtable.com/appHBqG4mqsMhhmQe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbluJy6YNZ4aOcHXy",
+          "mode": "list",
+          "cachedResultName": "Asesores",
+          "cachedResultUrl": "https://airtable.com/appHBqG4mqsMhhmQe/tbluJy6YNZ4aOcHXy"
+        },
+        "filterByFormula": "={Presupuesto} = \"{{ $('On form submission').item.json['Presupuesto Aproximado'] }}\"",
+        "options": {}
+      },
+      "id": "36c5bece-5602-4cd7-b5a5-efada29a9af8",
+      "name": "Search records",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        -32
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "3OWUCyans7yFMXFD",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.fields['Nombre del Asesor'] }}",
+                    "rightValue": "Ruben Garay",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0c03e028-96b7-473c-bd73-f2846326199e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ruben Garay"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "aa55cf26-1a71-4ee2-bf83-b63f3ca89679",
+                    "leftValue": "={{ $json.fields['Nombre del Asesor'] }}",
+                    "rightValue": "Yoda Abrahimovic",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Yoda Abrahimovic"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7b2697c0-fee2-4d2a-aef5-7fd850489324",
+                    "leftValue": "={{ $json.fields['Nombre del Asesor'] }}",
+                    "rightValue": "Kane Yupa",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Kane Yupa"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3e82c411-e376-484a-a11c-fbd71fb0204c",
+                    "leftValue": "={{ $json.fields['Nombre del Asesor'] }}",
+                    "rightValue": "Alex Rocha",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Alex Rocha"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a3c5e329-4edc-4b56-9adf-bfd9e9edade9",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "5527652419",
+        "message": "=Confirmar si el cliente {{ $('On form submission').item.json.Nombre }} con telefono {{ $('On form submission').item.json.Telefono }} y corrreo {{ $('On form submission').item.json['Correo electronico'] }} ha sido atendido",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "¿Ha sido sido atendido el cliente?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Sí"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ingresa el DNI del cliente atendido",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ba6e495c-a117-4790-8a40-b0662eb06f05",
+      "name": "Send message and wait for response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        -304
+      ],
+      "webhookId": "bb569980-a188-4a86-8d4f-49dbcc8ee670",
+      "credentials": {
+        "telegramApi": {
+          "id": "FaKXjX0i7c64PMg0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "rbngms@gmail.com",
+        "subject": "=Nuevo cliente - Potencial de negocio {{ $json['Potencial de negocio'] }}",
+        "message": "=Nuevo cliente\nEl cliente {{ $json.Nombre }} \nPerfil: {{ $json['Analisis de cliente IA'] }}\nPresupuesto: {{ $json['Presupuesto Aproximado'] }}\nAtendido: {{ $json['¿Ha sido atendido?'] }}",
+        "options": {}
+      },
+      "id": "5bb8c7f6-52a6-48c9-96fc-895563e06ae1",
+      "name": "Send a message",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1520,
+        -64
+      ],
+      "webhookId": "b00bdc92-3ae8-46ad-b8cd-b1b288b9a1fa",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F4q6SESQRXkQXPWo",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "5527652419",
+        "message": "=Confirmar si el cliente {{ $('On form submission').item.json.Nombre }} con telefono {{ $('On form submission').item.json.Telefono }} y corrreo {{ $('On form submission').item.json['Correo electronico'] }} ha sido atendido",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "¿Ha sido sido atendido el cliente?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Sí"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ingresa el DNI del cliente atendido",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f6f5b2f7-d688-4a91-956a-fc3184fb9eec",
+      "name": "Send message and wait for response1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        -128
+      ],
+      "webhookId": "f0e0556c-e141-4f78-9b3e-d88e4e6f56f7",
+      "credentials": {
+        "telegramApi": {
+          "id": "FaKXjX0i7c64PMg0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "5527652419",
+        "message": "=Confirmar si el cliente {{ $('On form submission').item.json.Nombre }} con telefono {{ $('On form submission').item.json.Telefono }} y corrreo {{ $('On form submission').item.json['Correo electronico'] }} ha sido atendido",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "¿Ha sido sido atendido el cliente?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Sí"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ingresa el DNI del cliente atendido",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5fc04ac9-e476-4e5e-9c6f-90b1c1867c04",
+      "name": "Send message and wait for response2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        32
+      ],
+      "webhookId": "e395046d-d429-4caf-9d60-a96e1f119739",
+      "credentials": {
+        "telegramApi": {
+          "id": "FaKXjX0i7c64PMg0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "5527652419",
+        "message": "=Confirmar si el cliente {{ $('On form submission').item.json.Nombre }} con telefono {{ $('On form submission').item.json.Telefono }} y corrreo {{ $('On form submission').item.json['Correo electronico'] }} ha sido atendido",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "¿Ha sido sido atendido el cliente?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Sí"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ingresa el DNI del cliente atendido",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ab290da6-cc2f-485a-baab-c29c565b8524",
+      "name": "Send message and wait for response3",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        192
+      ],
+      "webhookId": "fda55651-bc8c-4e44-a29d-f99e6877814d",
+      "credentials": {
+        "telegramApi": {
+          "id": "FaKXjX0i7c64PMg0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "lookup",
+        "workbook": {
+          "__rl": true,
+          "value": "A4371B99D0D312!1213",
+          "mode": "list",
+          "cachedResultName": "codigos",
+          "cachedResultUrl": "https://onedrive.live.com/personal/00a4371b99d0d312/_layouts/15/doc.aspx?resid=99d0d312-371b-20a4-8000-bd0400000000&cid=00a4371b99d0d312"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{07070A90-7347-4568-A3B1-5712CE95DF38}",
+          "mode": "list",
+          "cachedResultName": "asesores",
+          "cachedResultUrl": "https://onedrive.live.com/personal/00a4371b99d0d312/_layouts/15/doc.aspx?resid=99d0d312-371b-20a4-8000-bd0400000000&cid=00a4371b99d0d312&activeCell=asesores!A1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "{CEC070C6-3C03-4E4B-B983-8959E5C3B6C0}",
+          "mode": "list",
+          "cachedResultName": "Asesores",
+          "cachedResultUrl": "https://onedrive.live.com/personal/00a4371b99d0d312/_layouts/15/doc.aspx?resid=99d0d312-371b-20a4-8000-bd0400000000&cid=00a4371b99d0d312&activeCell=asesores!A1:D5"
+        },
+        "lookupColumn": "Presupuesto",
+        "lookupValue": "={{ $('On form submission').item.json['Presupuesto Aproximado'] }}",
+        "options": {}
+      },
+      "id": "4b28f4b6-6ac6-4baf-bba9-76272284724c",
+      "name": "Lookup a column",
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        -368
+      ],
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "kwNPTaYjlbkUNUSP",
+          "name": "Microsoft Excel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appHBqG4mqsMhhmQe",
+          "mode": "list",
+          "cachedResultName": "TrabajoFinalCoder",
+          "cachedResultUrl": "https://airtable.com/appHBqG4mqsMhhmQe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVzMpf3kJYxMbp1",
+          "mode": "list",
+          "cachedResultName": "Clientes",
+          "cachedResultUrl": "https://airtable.com/appHBqG4mqsMhhmQe/tblVzMpf3kJYxMbp1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "DNI": "={{ $('On form submission').item.json.DNI }}",
+            "Teléfono": "={{ $('On form submission').item.json.Telefono }}",
+            "Nombre": "={{ $('On form submission').item.json.Nombre }}",
+            "Correo electrónico": "={{ $('On form submission').item.json['Correo electronico'] }}",
+            "Presupuesto Aproximado": "={{ $('On form submission').item.json['Presupuesto Aproximado'] }}",
+            "Comentario/Información adicional": "={{ $('On form submission').item.json['Comentario/Información adicional'] }}",
+            "Producto de interes": "={{ $('On form submission').item.json['Producto de interes'] }}",
+            "Fecha": "={{ $('On form submission').item.json.submittedAt }}",
+            "Análisis de cliente IA": "={{ $json.output.perfil_rapido }}",
+            "Potencial de negocio": "={{ $json.output.potencial_negocio }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Correo electrónico",
+              "displayName": "Correo electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Presupuesto Aproximado",
+              "displayName": "Presupuesto Aproximado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Más de S/400,000",
+                  "value": "Más de S/400,000"
+                },
+                {
+                  "name": "S/250,000 - S/400,000",
+                  "value": "S/250,000 - S/400,000"
+                },
+                {
+                  "name": "S/150,000 - S/250,000",
+                  "value": "S/150,000 - S/250,000"
+                },
+                {
+                  "name": "Menos de S/150,000",
+                  "value": "Menos de S/150,000"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Comentario/Información adicional",
+              "displayName": "Comentario/Información adicional",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Producto de interes",
+              "displayName": "Producto de interes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Análisis de cliente IA",
+              "displayName": "Análisis de cliente IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Potencial de negocio",
+              "displayName": "Potencial de negocio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "alto",
+                  "value": "alto"
+                },
+                {
+                  "name": "media",
+                  "value": "media"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "¿Ha sido atendido?",
+              "displayName": "¿Ha sido atendido?",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Asesores",
+              "displayName": "Asesores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        208
+      ],
+      "id": "876dbe3a-2953-4b4e-875d-77f7db0ad00b",
+      "name": "Create a record",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "3OWUCyans7yFMXFD",
+          "name": "Airtable account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appHBqG4mqsMhhmQe",
+          "mode": "list",
+          "cachedResultName": "TrabajoFinalCoder",
+          "cachedResultUrl": "https://airtable.com/appHBqG4mqsMhhmQe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblVzMpf3kJYxMbp1",
+          "mode": "list",
+          "cachedResultName": "Clientes",
+          "cachedResultUrl": "https://airtable.com/appHBqG4mqsMhhmQe/tblVzMpf3kJYxMbp1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "DNI": "={{ $json.data['Ingresa el DNI del cliente atendido'] }}",
+            "¿Ha sido atendido?": "={{ $json.data['¿Ha sido sido atendido el cliente?'] }}"
+          },
+          "matchingColumns": [
+            "DNI"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Correo electrónico",
+              "displayName": "Correo electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Presupuesto Aproximado",
+              "displayName": "Presupuesto Aproximado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Más de S/400,000",
+                  "value": "Más de S/400,000"
+                },
+                {
+                  "name": "S/250,000 - S/400,000",
+                  "value": "S/250,000 - S/400,000"
+                },
+                {
+                  "name": "S/150,000 - S/250,000",
+                  "value": "S/150,000 - S/250,000"
+                },
+                {
+                  "name": "Menos de S/150,000",
+                  "value": "Menos de S/150,000"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Comentario/Información adicional",
+              "displayName": "Comentario/Información adicional",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Producto de interes",
+              "displayName": "Producto de interes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Análisis de cliente IA",
+              "displayName": "Análisis de cliente IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Potencial de negocio",
+              "displayName": "Potencial de negocio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "alto",
+                  "value": "alto"
+                },
+                {
+                  "name": "media",
+                  "value": "media"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "¿Ha sido atendido?",
+              "displayName": "¿Ha sido atendido?",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Asesores",
+              "displayName": "Asesores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1296,
+        -64
+      ],
+      "id": "af2b9324-03c7-46cd-925e-597306227007",
+      "name": "Update record",
+      "retryOnFail": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "3OWUCyans7yFMXFD",
+          "name": "Airtable account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appHBqG4mqsMhhmQe",
+          "mode": "list",
+          "cachedResultName": "TrabajoFinalCoder",
+          "cachedResultUrl": "https://airtable.com/appHBqG4mqsMhhmQe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl6ys8IunhGhhUyo",
+          "mode": "list",
+          "cachedResultName": "Errores",
+          "cachedResultUrl": "https://airtable.com/appHBqG4mqsMhhmQe/tbl6ys8IunhGhhUyo"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "DNI": "={{ $('On form submission').first().json.DNI }}",
+            "fecha": "={{ $now.toISO() }}",
+            "Nombre Error": "={{ $json.error?.node?.name || $json.error?.context?.node?.name || 'Desconocido' }}",
+            "Error Detalle": "={{ $json.error?.message || $json.error?.description || 'Sin detalle disponible' }}",
+            "ID": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Nombre Error",
+              "displayName": "Nombre Error",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Error Detalle",
+              "displayName": "Error Detalle",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        -208
+      ],
+      "id": "99796d1a-0a89-428f-9558-cb1a9c64c8c5",
+      "name": "Create a record1",
+      "retryOnFail": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "3OWUCyans7yFMXFD",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Nombre": "Grillo",
+          "DNI": 123456788,
+          "Telefono": 991166765,
+          "Correo electronico": "rbngms@gmail.com",
+          "Presupuesto Aproximado": "S/250,000 - S/400,000",
+          "Comentario/Información adicional": "Quiero comprar alicorp",
+          "Producto de interes": "Acciones",
+          "submittedAt": "2026-08-27T23:21:48.955-05:00",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send message and wait for response1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send message and wait for response2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send message and wait for response3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response1": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response2": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response3": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "03970f0d-dc5f-463f-bede-db7afc6bc5d0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a2adc30bfbb793583cbecf28196d4481947ddb4f1079c4a0cd512b7c09b53bed"
+  },
+  "nodeGroups": [],
+  "id": "mgv9GoqLbugleg9Q",
+  "tags": []
+}
